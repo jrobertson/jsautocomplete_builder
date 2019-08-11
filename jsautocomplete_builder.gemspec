@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'jsautocomplete_builder'
-  s.version = '0.1.0'
+  s.version = '0.1.1'
   s.summary = 'Makes it trivial to build an autocomplete search feature into a web page.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/jsautocomplete_builder.rb']

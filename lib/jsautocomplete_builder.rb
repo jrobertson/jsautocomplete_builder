@@ -21,7 +21,7 @@ class JsAutocompleteBuilder
 html=<<EOF
       <form action='#{@server[:action]}' method='get' name='searchForm'>
 
-        <input tabindex='2' type='text' autofocus='true' onkeyup='updateList(event.keyCode, this)' onfocus='showList()' onblur='hideList()' id='search' autocomplete='off' name='q'/>
+        <input tabindex='2' type='text' autofocus='true' onkeyup='input = this.value; updateList(event.keyCode, this)'  placeholder='search' onfocus='showList()' onblur='hideList()' id='search' autocomplete='off' name='q'/>
         <input type='submit' value='search'>
         <ol id='autolist'></ol>
 
@@ -107,6 +107,14 @@ EOF
 
   def js()
 <<EOF
+      const KEY_UP = 38;
+      const KEY_DOWN = 40;
+      const ESC_KEY = 27;
+      const ENTER_KEY = 13;
+      const SPACEBAR_KEY = 32;
+      
+      var input = ''; 
+
       function ajaxRequest(url, cFunction) {
         var xhttp;
         xhttp = new XMLHttpRequest();
@@ -131,18 +139,17 @@ EOF
 
       function updateList(keyCode, e) {
 
-        // esc key?
-        if (keyCode == 27)
+        if (keyCode == ESC_KEY)
           return
 
-        // down arrow key?
-        if (keyCode == 40) {
-          showList();
+        if (keyCode == KEY_DOWN) {
+          //showList();
           li = document.getElementById('autolist').children.item(0);
           e.value = li.textContent; 
           li.focus();
           return 
         }
+
         //e.value;
         if (e.value.length > 0) {
           ajaxFetchList(e);
@@ -165,16 +172,14 @@ EOF
 
       function itemKeyup(keyCode, e) {
 
-        console.log('keyCode: ' + keyCode);
+        //console.log('keyCode: ' + keyCode);
         txt = document.getElementById('search');
 
-        // enter key or spacebar key?
-        if (keyCode == 13 || keyCode == 32) {
+        if (keyCode == ENTER_KEY || keyCode == SPACEBAR_KEY) {
           itemSelected(e)
         }
 
-        // up arrow?
-        else if (keyCode == 38) {
+        else if (keyCode == KEY_UP) {
           if (e.previousElementSibling) {
             txt.value = e.previousElementSibling.textContent;          
             e.previousElementSibling.focus();
@@ -182,14 +187,16 @@ EOF
           else
             document.getElementById('search').focus();
         }
-        // down arrow?
-        else if (keyCode == 40) {
+
+        else if (keyCode == KEY_DOWN) {
 
           txt.value = e.nextElementSibling.textContent;          
           e.nextElementSibling.focus();
         }
-        // esc key?
-        else if (keyCode == 27) {
+
+        else if (keyCode == ESC_KEY) {
+          // select the original search text value
+          txt.value = input;
           list = document.getElementById('autolist');
           list.style.display = 'none';
           txt.focus();
@@ -208,8 +215,8 @@ EOF
       function showList() {
 
         console.log('parent2: ' + document.activeElement.nodeName);
-        txt = document.getElementById('search');
-
+        txt = document.getElementById('search');    
+        
         if (txt.value.length > 0) {
           list = document.getElementById('autolist');
           list.style.display = 'block';
